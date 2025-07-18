@@ -6,7 +6,7 @@ describe('Page', () => {
     render(<Page />);
 
     const heading = screen.getByRole('heading', {
-      name: /Kigalaboratory Wiki/i,
+      name: /スーパーすごいプロジェクト Kiga Wiki へようこそ！/i,
     });
 
     expect(heading).toBeInTheDocument();
