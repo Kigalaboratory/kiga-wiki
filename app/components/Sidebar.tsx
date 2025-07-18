@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function Sidebar() {
   const [activeItem, setActiveItem] = useState('ホーム');
@@ -48,13 +49,14 @@ export default function Sidebar() {
   };
 
   const sidebarItems = [
-    { name: 'ホーム', icon: '🏠' },
-    { name: 'はじめの一歩！', icon: '🚀' },
-    { name: 'インストール（超簡単）', icon: '🔧' },
-    { name: '使い方（ヒミツ）', icon: '🎮' },
-    { name: 'API（難しいやつ）', icon: '🤖' },
-    { name: 'よくある質問（笑）', icon: '❓', className: 'wiggle' },
-    { name: '隠しページ', icon: '🎁', className: 'special' },
+    { name: '胃袋への挑戦状', icon: '☣️', href: '/lab-meshi', className: 'special rainbow-text' },
+    { name: 'ホーム', icon: '🏠', href: '/' },
+    { name: 'はじめの一歩！', icon: '🚀', href: '#' },
+    { name: 'インストール（超簡単）', icon: '🔧', href: '#' },
+    { name: '使い方（ヒミツ）', icon: '🎮', href: '#' },
+    { name: 'API（難しいやつ）', icon: '🤖', href: '#' },
+    { name: 'よくある質問（笑）', icon: '❓', className: 'wiggle', href: '#' },
+    { name: '隠しページ', icon: '🎁', className: 'special', href: '#' },
   ];
 
   return (
@@ -63,14 +65,14 @@ export default function Sidebar() {
         <div className="sidebar-header">ページ</div>
         <nav>
           {sidebarItems.map(item => (
-            <a 
+            <Link
               key={item.name}
-              href="#" 
+              href={item.href}
               className={`sidebar-item ${activeItem === item.name ? 'active' : ''} ${item.className || ''}`}
               onClick={() => handleItemClick(item.name)}
             >
               {item.icon} {item.name}
-            </a>
+            </Link>
           ))}
         </nav>
         <button className="add-page-btn">
