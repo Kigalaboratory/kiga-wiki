@@ -1,17 +1,63 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { InlineMath } from 'react-katex';
-import { sampleDishes } from './data';
 import DishList from '../components/DishList';
 import ReviewForm from '../components/ReviewForm';
 import { Dish } from '../types';
 
 export default function LabMeshiPage() {
   const formula = 'LIM-Score = (GSI * 0.4) + (CPR * 0.3) + (TTP * 0.1) + (LCS * 0.2) + \\alpha';
-  const [dishes, setDishes] = useState<Dish[]>(sampleDishes);
+  const [dishes, setDishes] = useState<Dish[]>([]);
+  const [selectedDishId, setSelectedDishId] = useState<number | null>(null);
 
-  const handleAddDish = (newDish: Dish) => {
-    setDishes([...dishes, newDish]);
+  const fetchDishes = async () => {
+    const response = await fetch('/api/dishes');
+    const data = await response.json();
+    setDishes(data);
+  };
+
+  useEffect(() => {
+    fetchDishes();
+  }, []);
+
+  const handleSubmit = async (data: { name?: string; chef: string; comment: string; dishId?: number }) => {
+    if (data.dishId) {
+      // Add a review to an existing dish
+      await handleAddReview(data as { dishId: number; chef: string; comment: string });
+    } else {
+      // Add a new dish
+      await handleAddDish(data as { name: string; chef: string; comment: string });
+    }
+    setSelectedDishId(null); // Close the form after submission
+  };
+
+  const handleAddDish = async (newDishData: { name: string; chef: string; comment: string }) => {
+    // (既存のロジックはほぼ同じ)
+    try {
+      const response = await fetch('/api/dishes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newDishData),
+      });
+      if (!response.ok) throw new Error('Failed to create dish');
+      await fetchDishes();
+    } catch (error) {
+      console.error('Failed to add dish:', error);
+    }
+  };
+
+  const handleAddReview = async (newReviewData: { dishId: number; chef: string; comment: string }) => {
+    try {
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newReviewData),
+      });
+      if (!response.ok) throw new Error('Failed to create review');
+      await fetchDishes();
+    } catch (error) {
+      console.error('Failed to add review:', error);
+    }
   };
 
   return (
@@ -108,12 +154,21 @@ export default function LabMeshiPage() {
 
       <section>
         <h2>4. 新規評価投稿</h2>
-        <ReviewForm onAddDish={handleAddDish} />
+        <ReviewForm onSubmit={handleSubmit} />
       </section>
 
       <section>
         <h2>5. ラボ飯リスト (Lab-Meshi List)</h2>
-        <DishList dishes={dishes} />
+        <DishList dishes={dishes} onSelectDish={setSelectedDishId} selectedDishId={selectedDishId} />
+        {selectedDishId && (
+          <div className="review-form-container">
+            <ReviewForm
+              onSubmit={handleSubmit}
+              dishId={selectedDishId}
+              dishName={dishes.find(d => d.id === selectedDishId)?.name}
+            />
+          </div>
+        )}
       </section>
     </article>
   );

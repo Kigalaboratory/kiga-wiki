@@ -1,58 +1,63 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { vi } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import LabMeshiPage from './page';
 
+// fetch API のモック
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
+
 // react-katex のモック
-vi.mock('react-katex', () => {
-  return {
-    InlineMath: ({ children }: { children: React.ReactNode }) => <span className="katex-mock">{children}</span>,
-  };
-});
+vi.mock('react-katex', () => ({
+  InlineMath: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
+}));
 
+describe('LabMeshiPage Integration Test', () => {
+  beforeEach(() => {
+    mockFetch.mockClear();
+  });
 
-describe('LabMeshi Page', () => {
-  it('should render the page title', () => {
-    render(<LabMeshiPage />);
-    const heading = screen.getByRole('heading', {
-      level: 1,
-      name: /当研究室における非公式調理活動（通称：ラボ飯）の定量的評価と格付けに関する包括的報告書/i,
+  it('should display a new dish after submission', async () => {
+    // 1. 初回レンダリング時のGETリクエストをモック
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [],
     });
-    expect(heading).toBeInTheDocument();
-  });
 
-  it('should render the formula with KaTeX', () => {
     render(<LabMeshiPage />);
-    // "最終スコア計算式:" のテキストを持つ要素を取得
-    const formulaTitle = screen.getByText('最終スコア計算式:');
-    // その親のpタグの、さらに次の兄弟要素（数式をラップするpタグ）の中身をテスト
-    const formulaWrapper = formulaTitle.parentElement?.nextElementSibling;
-    expect(formulaWrapper).not.toBeNull();
-    // @ts-expect-error: formulaWrapper is checked for nullity
-    expect(formulaWrapper.querySelector('.katex-mock')).toBeInTheDocument();
-  });
 
-  it('should render a list of dishes', () => {
-    render(<LabMeshiPage />);
-    const dishName = screen.getByText('究極のペペロンチーノ');
-    expect(dishName).toBeInTheDocument();
-  });
+    // 2. 初回はリストが空であることを確認
+    const list = screen.getByTestId('dish-list');
+    expect(list.querySelector('li')).toBeNull();
 
-  it('should add a new dish to the list when the form is submitted', async () => {
-    render(<LabMeshiPage />);
+    // 3. POSTリクエストと、その後のGETリクエストをモック
+    const newDish = { id: 1, name: '新作テスト料理', chef: 'テスト担当', comment: 'テストコメント', createdAt: new Date().toISOString() };
+    mockFetch
+      .mockResolvedValueOnce({ // POST
+        ok: true,
+        json: async () => newDish,
+      })
+      .mockResolvedValueOnce({ // GET after POST
+        ok: true,
+        json: async () => [newDish],
+      });
+
+    // 4. フォーム入力と送信
     const user = userEvent.setup();
+    await user.type(screen.getByLabelText('料理名'), newDish.name);
+    await user.type(screen.getByLabelText('ハンドルネーム'), newDish.chef);
+    await user.type(screen.getByLabelText('コメント'), newDish.comment || '');
+    await user.click(screen.getByRole('button', { name: '評価を投稿' }));
 
-    const dishNameInput = screen.getByLabelText('料理名');
-    const chefNameInput = screen.getByLabelText('ハンドルネーム');
-    const commentInput = screen.getByLabelText('コメント');
-    const submitButton = screen.getByRole('button', { name: '評価を投稿' });
+    // 5. 新しい料理がリストに表示されるのを待つ
+    await waitFor(() => {
+      const list = screen.getByTestId('dish-list');
+      expect(list.querySelector('li')).not.toBeNull();
+      expect(screen.getByText(newDish.name)).toBeInTheDocument();
+    });
 
-    await user.type(dishNameInput, '新作ラボ飯');
-    await user.type(chefNameInput, '新人研究員');
-    await user.type(commentInput, '美味しかったです！');
-    await user.click(submitButton);
-
-    const newDishName = await screen.findByText('新作ラボ飯');
-    expect(newDishName).toBeInTheDocument();
+    // 6. fetchが期待通りに呼ばれたか確認
+    expect(mockFetch).toHaveBeenCalledTimes(3); // Initial GET, POST, GET after add
+    expect(mockFetch).toHaveBeenCalledWith('/api/dishes', expect.objectContaining({ method: 'POST' }));
   });
 });

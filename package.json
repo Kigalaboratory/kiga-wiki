@@ -2,6 +2,7 @@
   "name": "kigalaboratory-wiki",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -11,6 +12,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@prisma/client": "^6.12.0",
     "katex": "^0.16.22",
     "next": "15.4.1",
     "react": "19.1.0",
@@ -31,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.4.1",
     "jsdom": "^26.1.0",
+    "prisma": "^6.12.0",
     "typescript": "^5",
     "vitest": "^3.2.4"
   }

@@ -133,3 +133,94 @@ a {
     color: #ff0000;
   }
 }
+
+/* Silly Review Form Styles */
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 2rem;
+  border: 2px dashed #ccc;
+  transform: rotate(-1deg);
+  transition: transform 0.2s ease-in-out;
+}
+
+.review-form:hover {
+  transform: rotate(1deg);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: bold;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-size: 1.2rem;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: transparent;
+  animation: rainbow-text-animation 2s linear infinite;
+  box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff;
+}
+
+.silly-button {
+  padding: 1rem 2rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  background-color: #ff4757;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55), background-color 0.3s;
+}
+
+.silly-button:hover {
+  transform: scale(1.2) rotate(10deg);
+  background-color: #f7b731;
+}
+
+.silly-button:disabled {
+  background-color: #a4b0be;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@keyframes fly-away-animation {
+  0% {
+    transform: rotate(-1deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-150vh) rotate(1440deg) scale(0.1);
+    opacity: 0;
+  }
+}
+
+.fly-away {
+  /* animation-fill-modeをforwardsにすることで、アニメーション終了後も最後の状態を維持します */
+  animation: fly-away-animation 2s forwards cubic-bezier(0.5, -0.5, 0.5, 1.5);
+  /* アニメーションが他の要素の裏に隠れないように */
+  position: relative;
+  z-index: 100;
+}
+
+/* DishList Styles */
+.review-list {
+  margin-left: 2rem;
+  list-style-type: square;
+}
