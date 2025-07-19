@@ -52,7 +52,7 @@ describe('POST /api/visitors', () => {
     mockedPrisma.visitor.findFirst.mockResolvedValue(initialCount);
     mockedPrisma.visitor.update.mockResolvedValue(updatedCount);
 
-    const response = await POST(new Request('http://localhost'));
+    const response = await POST();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -70,7 +70,7 @@ describe('POST /api/visitors', () => {
     const newCount: Visitor = { id: 1, count: 1 };
     mockedPrisma.visitor.create.mockResolvedValue(newCount);
 
-    const response = await POST(new Request('http://localhost'));
+    const response = await POST();
     const data = await response.json();
 
     expect(response.status).toBe(201);
