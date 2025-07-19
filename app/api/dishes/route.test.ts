@@ -23,7 +23,8 @@ describe('GET /api/dishes', () => {
       { id: 1, name: 'モック料理1', chef: 'シェフ1', comment: 'コメント1', createdAt: mockDate },
       { id: 2, name: 'モック料理2', chef: 'シェフ2', comment: 'コメント2', createdAt: mockDate },
     ];
-    (prisma.dish.findMany as any).mockResolvedValue(mockDishes);
+    const mockFindMany = vi.mocked(prisma.dish.findMany);
+    mockFindMany.mockResolvedValue(mockDishes);
 
     const response = await GET();
     const data = await response.json();
@@ -42,7 +43,8 @@ describe('POST /api/dishes', () => {
     const newDish = { name: '新作ラボ飯', chef: '新人研究員', comment: '美味しかったです！' };
     const createdDish = { ...newDish, id: 3, createdAt: new Date() };
     
-    (prisma.dish.create as any).mockResolvedValue(createdDish);
+    const mockCreate = vi.mocked(prisma.dish.create);
+    mockCreate.mockResolvedValue(createdDish);
 
     const req = new NextRequest('http://localhost/api/dishes', {
       method: 'POST',
