@@ -5,7 +5,16 @@ export const getAllDishes = cache(async () => {
   try {
     const dishes = await prisma.dish.findMany({
       include: {
-        reviews: true,
+        comments: {
+          where: { parentId: null },
+          include: {
+            children: {
+              include: {
+                children: true,
+              },
+            },
+          },
+        },
       },
     });
     return dishes;
@@ -17,48 +26,30 @@ export const getAllDishes = cache(async () => {
 
 type CreateDishData = {
   name: string;
-  chef: string;
-  comment: string;
+  author: string;
+  content: string;
 };
 
 export async function createDish(data: CreateDishData) {
   try {
-    const { name, chef, comment } = data;
+    const { name, author, content } = data;
     const newDish = await prisma.dish.create({
       data: {
         name,
-        reviews: {
+        comments: {
           create: {
-            chef,
-            comment,
+            author,
+            content,
           },
         },
       },
       include: {
-        reviews: true,
+        comments: true,
       },
     });
     return newDish;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to create dish.');
-  }
-}
-
-type CreateReviewData = {
-  dishId: number;
-  chef: string;
-  comment: string;
-};
-
-export async function createReview(data: CreateReviewData) {
-  try {
-    const newReview = await prisma.review.create({
-      data,
-    });
-    return newReview;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to create review.');
   }
 }

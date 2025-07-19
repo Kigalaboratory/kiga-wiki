@@ -7,6 +7,7 @@ import CommentForm from './CommentForm';
 type CommentListProps = {
   comments: CommentWithChildren[];
   onReply: (data: { author?: string; content: string; parentId?: number, replyAuthor?: string }) => Promise<void>;
+  title?: string;
 };
 
 // 単一のコメントを表示するコンポーネント
@@ -50,10 +51,10 @@ const CommentItem = ({ comment, onReply }: { comment: CommentWithChildren, onRep
 };
 
 
-export default function CommentList({ comments, onReply }: CommentListProps) {
+export default function CommentList({ comments, onReply, title = "みんなの足跡" }: CommentListProps) {
   return (
     <section>
-      <h2>みんなの足跡</h2>
+      <h2>{title}</h2>
       {comments.length > 0 ? (
         <ul className="comment-list">
           {comments.map((comment) => (

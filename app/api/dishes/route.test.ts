@@ -2,7 +2,7 @@ import { GET, POST } from './route';
 import { prisma } from '../../lib/prisma';
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { NextRequest } from 'next/server';
-import { Dish, Review } from '@prisma/client';
+import { Dish, Comment } from '@prisma/client';
 
 vi.mock('../../lib/prisma', () => ({
   prisma: {
@@ -27,9 +27,9 @@ beforeEach(() => {
 describe('GET /api/dishes', () => {
   it('should return a list of dishes from the database', async () => {
     const mockDate = new Date();
-    const mockDishes: (Dish & { reviews: Review[] })[] = [
-      { id: 1, name: 'モック料理1', createdAt: mockDate, reviews: [] },
-      { id: 2, name: 'モック料理2', createdAt: mockDate, reviews: [] },
+    const mockDishes: (Dish & { comments: Comment[] })[] = [
+      { id: 1, name: 'モック料理1', createdAt: mockDate, comments: [] },
+      { id: 2, name: 'モック料理2', createdAt: mockDate, comments: [] },
     ];
     mockPrisma.dish.findMany.mockResolvedValue(mockDishes);
 
@@ -37,7 +37,11 @@ describe('GET /api/dishes', () => {
     const data = await response.json();
 
     // JSONシリアライズによりDateオブジェクトは文字列になるため、比較対象も文字列に変換する
-    const expectedDishes = mockDishes.map(d => ({ ...d, createdAt: d.createdAt.toISOString() }));
+    const expectedDishes = mockDishes.map(d => ({ 
+      ...d, 
+      createdAt: d.createdAt.toISOString(),
+      comments: [],
+    }));
 
     expect(response.status).toBe(200);
     expect(data).toEqual(expectedDishes);
@@ -46,55 +50,52 @@ describe('GET /api/dishes', () => {
 });
 
 describe('POST /api/dishes', () => {
-  it('should create a new dish and return it', async () => {
-    const newDish = { name: '新作ラボ飯', chef: '新人研究員', comment: '美味しかったです！' };
-    // `createDish`は`reviews`を含んだDishを返すため、モックの戻り値もそれに合わせる
-    const createdDish: Dish & { reviews: Review[] } = { 
+  it('should create a new dish with the first comment and return it', async () => {
+    const newDishRequest = { name: '新作ラボ飯', author: '新人研究員', content: '美味しかったです！' };
+    const createdDishWithComment: Dish & { comments: Comment[] } = { 
       id: 3, 
-      name: newDish.name, 
+      name: newDishRequest.name, 
       createdAt: new Date(),
-      reviews: [
-        { id: 1, dishId: 3, chef: newDish.chef, comment: newDish.comment, createdAt: new Date() }
+      comments: [
+        { id: 1, dishId: 3, author: newDishRequest.author, content: newDishRequest.content, createdAt: new Date(), parentId: null, replyAuthor: null }
       ] 
     };
     
-    mockPrisma.dish.create.mockResolvedValue(createdDish);
+    mockPrisma.dish.create.mockResolvedValue(createdDishWithComment);
 
     const req = new NextRequest('http://localhost/api/dishes', {
       method: 'POST',
-      body: JSON.stringify(newDish),
+      body: JSON.stringify(newDishRequest),
     });
 
     const response = await POST(req);
     const data = await response.json();
 
-    const { name, chef, comment } = newDish;
+    const { name, author, content } = newDishRequest;
     const expectedPrismaArgs = {
       data: {
         name,
-        reviews: {
+        comments: {
           create: {
-            chef,
-            comment,
+            author,
+            content,
           },
         },
       },
       include: {
-        reviews: true,
+        comments: true,
       },
     };
 
     expect(response.status).toBe(201);
-    // JSONシリアライズを考慮して期待値を生成
     const expectedResponse = { 
-      ...createdDish, 
-      createdAt: createdDish.createdAt.toISOString(),
-      reviews: createdDish.reviews.map(r => ({
-        ...r,
-        createdAt: r.createdAt.toISOString(),
+      ...createdDishWithComment, 
+      createdAt: createdDishWithComment.createdAt.toISOString(),
+      comments: createdDishWithComment.comments.map(c => ({
+        ...c,
+        createdAt: c.createdAt.toISOString(),
       })),
     };
-    // レスポンスの`data`が期待値と一致するか確認
     expect(data).toEqual(expectedResponse);
     expect(mockPrisma.dish.create).toHaveBeenCalledWith(expectedPrismaArgs);
     expect(mockPrisma.dish.create).toHaveBeenCalledTimes(1);

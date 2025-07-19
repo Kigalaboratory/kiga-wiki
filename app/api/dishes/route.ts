@@ -14,13 +14,13 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, chef, comment } = body;
+    const { name, author, content } = body;
 
-    if (!name || !chef) {
-      return new NextResponse('Name and chef are required', { status: 400 });
+    if (!name || !author || !content) {
+      return new NextResponse('Name, author, and content are required', { status: 400 });
     }
 
-    const newDish = await createDish({ name, chef, comment });
+    const newDish = await createDish({ name, author, content });
     return new NextResponse(JSON.stringify(newDish), {
       status: 201,
       headers: {
@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) {
       return new NextResponse('Invalid JSON', { status: 400 });
     }
+    console.error('[API_ERROR]', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

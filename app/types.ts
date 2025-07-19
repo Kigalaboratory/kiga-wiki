@@ -1,14 +1,3 @@
-export type Review = {
-  comment: string;
-  chef: string;
-};
-
-export type Dish = {
-  id: number;
-  name: string;
-  reviews: Review[];
-};
-
 export type Comment = {
   id: number;
   author: string;
@@ -21,3 +10,12 @@ export type Comment = {
 export type CommentWithChildren = Comment & {
   children: CommentWithChildren[];
 };
+
+export type Dish = {
+  id: number;
+  name: string;
+  createdAt: Date;
+  comments: CommentWithChildren[];
+};
+
+export type DishWithComments = Dish;

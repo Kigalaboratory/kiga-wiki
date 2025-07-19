@@ -190,8 +190,27 @@ a {
 }
 
 .silly-button:hover {
-  transform: scale(1.2) rotate(10deg);
-  background-color: #f7b731;
+  transform: translateY(-2px) rotate(-1deg);
+  box-shadow: 0 6px 12px rgba(255, 105, 180, 0.4);
+}
+
+/* ラボ飯ページのコメントコンテナ */
+.dish-comments-container {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  background-color: #fdfdff;
+}
+
+.dish-item {
+  margin-bottom: 2rem;
+}
+
+.dish-item > h3 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #2d3748;
 }
 
 .silly-button:disabled {

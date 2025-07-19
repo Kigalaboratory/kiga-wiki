@@ -28,15 +28,12 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { author, content, parentId, replyAuthor } = await req.json();
+  const { author, content, parentId, replyAuthor, dishId } = await req.json();
 
-  if (parentId && !replyAuthor) {
-    // 返信なのに返信者名がない
-    return NextResponse.json({ error: 'Reply author is required for replies' }, { status: 400 });
-  }
-  if (!parentId && !author) {
-    // 新規コメントなのに投稿者名がない
-    return NextResponse.json({ error: 'Author is required for new comments' }, { status: 400 });
+  const finalAuthor = parentId ? replyAuthor : author;
+
+  if (!finalAuthor) {
+    return NextResponse.json({ error: 'Author is required' }, { status: 400 });
   }
   if (!content) {
     return NextResponse.json({ error: 'Content is required' }, { status: 400 });
@@ -44,10 +41,10 @@ export async function POST(req: Request) {
 
   const newComment = await prisma.comment.create({
     data: {
-      author: parentId ? '' : author, // 返信の場合はauthorを空にするか、親のauthorを引き継ぐか決める
+      author: finalAuthor,
       content,
       parentId,
-      replyAuthor,
+      dishId,
     },
   });
   return NextResponse.json(newComment, { status: 201 });

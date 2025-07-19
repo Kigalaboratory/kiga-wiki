@@ -24,29 +24,35 @@ describe('CommentList', () => {
     expect(childComment.closest('.comment-replies')).not.toBeNull();
   });
 
-  it('should show a reply button and a form when clicked', () => {
+  it('should show a reply button and a form when clicked', async () => {
     const handleReply = vi.fn();
     render(<CommentList comments={mockComments} onReply={handleReply} />);
 
     const replyButtons = screen.getAllByRole('button', { name: '返信する' });
+    // mockCommentsには親が2つ、子が1つあるので、返信ボタンは3つ
     expect(replyButtons.length).toBe(3);
 
     // 1つ目のコメントの返信ボタンをクリック
     fireEvent.click(replyButtons[0]);
 
     // 返信フォームが表示されることを確認
-    expect(screen.getByLabelText('このコメントへの返信をどうぞ')).toBeInTheDocument();
+    const authorInput = screen.getByLabelText('返信者名を名乗るがよい');
+    const contentTextarea = screen.getByLabelText('この掲示板への熱き想いを語るのじゃ！');
+    const submitButton = screen.getByRole('button', { name: 'この想い、天に届け！' });
+    
+    expect(authorInput).toBeInTheDocument();
+    expect(contentTextarea).toBeInTheDocument();
+    expect(submitButton).toBeInTheDocument();
     
     // 返信フォームを送信
-    const textarea = screen.getByLabelText('このコメントへの返信をどうぞ');
-    const submitButton = screen.getByRole('button', { name: '返信を投稿する' });
-    
-    fireEvent.change(textarea, { target: { value: 'テスト返信' } });
-    fireEvent.click(submitButton);
+    await fireEvent.change(authorInput, { target: { value: 'テスト返信者' } });
+    await fireEvent.change(contentTextarea, { target: { value: 'テスト返信です' } });
+    await fireEvent.click(submitButton);
 
     expect(handleReply).toHaveBeenCalledWith({
-      content: 'テスト返信',
+      content: 'テスト返信です',
       parentId: 1,
+      replyAuthor: 'テスト返信者',
     });
   });
 

@@ -2,13 +2,14 @@
 import { useState, useEffect } from 'react';
 import { InlineMath } from 'react-katex';
 import DishList from '../components/DishList';
-import ReviewForm from '../components/ReviewForm';
-import { Dish } from '../types';
+import { DishWithComments } from '../types';
 
 export default function LabMeshiPage() {
   const formula = 'LIM-Score = (GSI * 0.4) + (CPR * 0.3) + (TTP * 0.1) + (LCS * 0.2) + \\alpha';
-  const [dishes, setDishes] = useState<Dish[]>([]);
-  const [selectedDishId, setSelectedDishId] = useState<number | null>(null);
+  const [dishes, setDishes] = useState<DishWithComments[]>([]);
+  const [newDishName, setNewDishName] = useState('');
+  const [newDishAuthor, setNewDishAuthor] = useState('');
+  const [newDishContent, setNewDishContent] = useState('');
 
   const fetchDishes = async () => {
     const response = await fetch('/api/dishes');
@@ -20,43 +21,37 @@ export default function LabMeshiPage() {
     fetchDishes();
   }, []);
 
-  const handleSubmit = async (data: { name?: string; chef: string; comment: string; dishId?: number }) => {
-    if (data.dishId) {
-      // Add a review to an existing dish
-      await handleAddReview(data as { dishId: number; chef: string; comment: string });
-    } else {
-      // Add a new dish
-      await handleAddDish(data as { name: string; chef: string; comment: string });
-    }
-    setSelectedDishId(null); // Close the form after submission
-  };
+  const handleAddDish = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!newDishName.trim() || !newDishAuthor.trim() || !newDishContent.trim()) return;
 
-  const handleAddDish = async (newDishData: { name: string; chef: string; comment: string }) => {
-    // (既存のロジックはほぼ同じ)
     try {
       const response = await fetch('/api/dishes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newDishData),
+        body: JSON.stringify({ name: newDishName, author: newDishAuthor, content: newDishContent }),
       });
       if (!response.ok) throw new Error('Failed to create dish');
+      setNewDishName('');
+      setNewDishAuthor('');
+      setNewDishContent('');
       await fetchDishes();
     } catch (error) {
       console.error('Failed to add dish:', error);
     }
   };
 
-  const handleAddReview = async (newReviewData: { dishId: number; chef: string; comment: string }) => {
+  const handleCommentSubmit = async (data: { author?: string; content: string; parentId?: number; replyAuthor?: string, dishId?: number }) => {
     try {
-      const response = await fetch('/api/reviews', {
+      const response = await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newReviewData),
+        body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error('Failed to create review');
+      if (!response.ok) throw new Error('Failed to submit comment');
       await fetchDishes();
     } catch (error) {
-      console.error('Failed to add review:', error);
+      console.error('Failed to submit comment:', error);
     }
   };
 
@@ -154,21 +149,48 @@ export default function LabMeshiPage() {
 
       <section>
         <h2>4. 新規評価投稿</h2>
-        <ReviewForm onSubmit={handleSubmit} />
+        <form onSubmit={handleAddDish} className="review-form">
+          <div className="form-group">
+            <label htmlFor="dishName">拙者が作りし料理の名を言ってみよ</label>
+            <input
+              id="dishName"
+              type="text"
+              value={newDishName}
+              onChange={(e) => setNewDishName(e.target.value)}
+              placeholder="例：伝説のカレー"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="authorName">お主の名を名乗るがよい</label>
+            <input
+              id="authorName"
+              type="text"
+              value={newDishAuthor}
+              onChange={(e) => setNewDishAuthor(e.target.value)}
+              placeholder="例：厨房の魔術師"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="commentContent">この料理への熱き想いを語るのじゃ！</label>
+            <textarea
+              id="commentContent"
+              value={newDishContent}
+              onChange={(e) => setNewDishContent(e.target.value)}
+              placeholder="例：この一皿に宇宙を見た…"
+              required
+            />
+          </div>
+          <button type="submit" className="silly-button">
+            この評価、天に届け！
+          </button>
+        </form>
       </section>
 
       <section>
         <h2>5. ラボ飯リスト (Lab-Meshi List)</h2>
-        <DishList dishes={dishes} onSelectDish={setSelectedDishId} selectedDishId={selectedDishId} />
-        {selectedDishId && (
-          <div className="review-form-container">
-            <ReviewForm
-              onSubmit={handleSubmit}
-              dishId={selectedDishId}
-              dishName={dishes.find(d => d.id === selectedDishId)?.name}
-            />
-          </div>
-        )}
+        <DishList dishes={dishes} onCommentSubmit={handleCommentSubmit} />
       </section>
     </article>
   );

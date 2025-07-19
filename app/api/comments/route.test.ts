@@ -1,5 +1,5 @@
 import { GET, POST } from './route';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '../../lib/prisma';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import type { Comment } from '@prisma/client';
@@ -14,7 +14,7 @@ type StringifiedCommentWithChildren = Omit<CommentWithChildren, 'createdAt' | 'c
 };
 
 // prismaモジュール全体をモック化
-vi.mock('@/lib/prisma', () => ({
+vi.mock('../../lib/prisma', () => ({
   prisma: {
     comment: {
       findMany: vi.fn(),
@@ -111,15 +111,14 @@ describe('POST /api/comments', () => {
   });
 
   it('should create a new reply comment and return it', async () => {
-    const newReply = { author: '返信者', content: '返信です', parentId: 1 };
-    // モックデータに型を適用
-    const createdReply: Comment = { ...newReply, id: 4, createdAt: new Date() };
+    const newReplyRequest = { replyAuthor: '返信者', content: '返信です', parentId: 1 };
+    const createdReply: Comment = { id: 4, author: '返信者', content: '返信です', parentId: 1, createdAt: new Date(), replyAuthor: '返信者', dishId: null };
 
     mockedPrisma.comment.create.mockResolvedValue(createdReply);
 
     const req = new NextRequest('http://localhost/api/comments', {
       method: 'POST',
-      body: JSON.stringify(newReply),
+      body: JSON.stringify(newReplyRequest),
     });
 
     const response = await POST(req);
@@ -127,6 +126,13 @@ describe('POST /api/comments', () => {
 
     expect(response.status).toBe(201);
     expect(data).toEqual({ ...createdReply, createdAt: createdReply.createdAt.toISOString() });
-    expect(mockedPrisma.comment.create).toHaveBeenCalledWith({ data: newReply });
+    expect(mockedPrisma.comment.create).toHaveBeenCalledWith({
+      data: {
+        author: '返信者',
+        content: '返信です',
+        parentId: 1,
+        dishId: undefined,
+      },
+    });
   });
 });

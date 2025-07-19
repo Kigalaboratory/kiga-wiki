@@ -40,4 +40,38 @@ describe('getAllDishes', () => {
     // 正しいデータが返されることを確認
     expect(result).toEqual(mockDishes);
   });
+
+  it('should return dishes with their comments', async () => {
+    const mockDishesWithComments = [
+      {
+        id: 1,
+        name: 'Curry',
+        reviews: [], // This will be changed to comments
+        comments: [
+          { id: 1, content: 'Spicy!', author: 'Kiga', dishId: 1, parentId: null, createdAt: new Date(), replyAuthor: null },
+        ],
+      },
+    ];
+    // @ts-expect-error reviews will be removed
+    vi.mocked(prisma.dish.findMany).mockResolvedValue(mockDishesWithComments);
+
+    const result = await getAllDishes();
+
+    expect(prisma.dish.findMany).toHaveBeenCalledWith({
+      include: {
+        comments: {
+          where: { parentId: null },
+          include: {
+            children: {
+              include: {
+                children: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    expect(result[0].comments).toHaveLength(1);
+    expect(result[0].comments[0].content).toBe('Spicy!');
+  });
 });

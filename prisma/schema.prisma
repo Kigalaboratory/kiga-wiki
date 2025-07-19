@@ -11,19 +11,10 @@ datasource db {
 }
 
 model Dish {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
-  reviews   Review[]
-  createdAt DateTime @default(now())
-}
-
-model Review {
-  id        Int      @id @default(autoincrement())
-  dish      Dish     @relation(fields: [dishId], references: [id])
-  dishId    Int
-  chef      String
-  comment   String
-  createdAt DateTime @default(now())
+  comments  Comment[]
+  createdAt DateTime  @default(now())
 }
 
 model Visitor {
@@ -32,12 +23,14 @@ model Visitor {
 }
 
 model Comment {
-  id           Int      @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   author       String
   replyAuthor  String?
   content      String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime  @default(now())
   parentId     Int?
-  parent       Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  parent       Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
   children     Comment[] @relation("CommentReplies")
+  dishId       Int?
+  dish         Dish?     @relation(fields: [dishId], references: [id])
 }
