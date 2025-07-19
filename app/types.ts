@@ -8,3 +8,15 @@ export type Dish = {
   name: string;
   reviews: Review[];
 };
+
+export type Comment = {
+  id: number;
+  author: string;
+  content: string;
+  createdAt: Date;
+  parentId: number | null;
+};
+
+export type CommentWithChildren = Comment & {
+  children: CommentWithChildren[];
+};

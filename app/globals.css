@@ -224,3 +224,45 @@ a {
   margin-left: 2rem;
   list-style-type: square;
 }
+
+/* Visitor Counter Styles */
+.visitor-number {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #805ad5;
+  display: inline-block;
+}
+
+.kiriban {
+  animation: rainbow-text-animation 1s linear infinite, kiriban-zoom 1s ease-in-out infinite alternate;
+  font-size: 3rem !important;
+  font-weight: 900;
+  text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff00ff, 0 0 40px #00ffff;
+  transform-origin: center;
+}
+
+@keyframes kiriban-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.5) rotate(5deg);
+  }
+}
+
+.kiriban-message {
+  margin-top: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ff4757;
+  animation: bounce 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-5px);
+  }
+}

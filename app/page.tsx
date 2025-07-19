@@ -1,8 +1,47 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import CodeBlock from "./components/CodeBlock";
+import VisitorCounter from "./components/VisitorCounter";
+import CommentForm from "./components/CommentForm";
+import CommentList from "./components/CommentList";
+import { CommentWithChildren } from "./types";
 
 export default function Page() {
+  const [comments, setComments] = useState<CommentWithChildren[]>([]);
+
+  const fetchComments = async () => {
+    const response = await fetch('/api/comments');
+    const data = await response.json();
+    setComments(data);
+  };
+
+  useEffect(() => {
+    fetchComments();
+  }, []);
+
+  const handleCommentSubmit = async (comment: { author?: string; content: string; parentId?: number }) => {
+    const postData = {
+      author: comment.author || '名無しさん', // authorがなければデフォルト値
+      content: comment.content,
+      parentId: comment.parentId,
+    };
+
+    await fetch('/api/comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(postData),
+    });
+    await fetchComments();
+  };
+
+  const handleScrollToComment = () => {
+    const form = document.getElementById('comment-form');
+    form?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const quickStartCode = `$ npm install project-name
 $ npx project-name init`;
 
@@ -31,6 +70,8 @@ project.doMagic()
         <p>
           このWikiページは、木賀研究室の裏ホームページとして、暗躍しています。左側のナビゲーションから必要な情報を見つけることができます。（迷子にならないでね👀）。
         </p>
+
+        <VisitorCounter onScrollToComment={handleScrollToComment} />
 
         <div className="alert alert-pink">
           <span className="alert-icon icon-bomb"></span>
@@ -125,6 +166,11 @@ project.doMagic()
           <p>最終更新: <time dateTime="2023-10-15">2023年10月15日</time></p>
         </div>
       </article>
+
+      <aside className="comments-section">
+        <CommentList comments={comments} onReply={handleCommentSubmit} />
+        <CommentForm onSubmit={handleCommentSubmit} />
+      </aside>
     </main>
   );
 }

@@ -25,3 +25,19 @@ model Review {
   comment   String
   createdAt DateTime @default(now())
 }
+
+model Visitor {
+  id    Int @id @default(autoincrement())
+  count Int
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  author    String
+  content   String
+  createdAt DateTime @default(now())
+
+  parentId  Int?
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  children  Comment[] @relation("CommentReplies")
+}
