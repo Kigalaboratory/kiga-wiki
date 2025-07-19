@@ -1,5 +1,6 @@
+/// <reference types="vitest/globals" />
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, type Mock } from 'vitest';
 import VisitorCounter from './VisitorCounter';
 
 // isKiribanをモック化
@@ -10,7 +11,7 @@ vi.mock('../lib/kiriban', () => ({
 describe('VisitorCounter', () => {
   it('should show a scroll button when it is a kiriban number', async () => {
     const { isKiriban } = await import('../lib/kiriban');
-    (isKiriban as any).mockReturnValue(true);
+    (isKiriban as Mock).mockReturnValue(true);
 
     // モックAPI
     global.fetch = vi.fn()
@@ -30,7 +31,7 @@ describe('VisitorCounter', () => {
 
   it('should not show a scroll button when it is not a kiriban number', async () => {
     const { isKiriban } = await import('../lib/kiriban');
-    (isKiriban as any).mockReturnValue(false);
+    (isKiriban as Mock).mockReturnValue(false);
 
     // モックAPI
     global.fetch = vi.fn()

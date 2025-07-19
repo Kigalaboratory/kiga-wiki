@@ -22,13 +22,13 @@ describe('Sidebar', () => {
   it('should apply rainbow and marquee styles to the special item', () => {
     render(<Sidebar />);
     const link = screen.getByRole('link', { name: /胃袋への挑戦状/i });
-    const spans = link.querySelectorAll('span');
-    expect(spans.length).toBe(2); // 2つのspanでシームレスなアニメーション
-    spans.forEach(span => {
+    const span = link.querySelector('span');
+    expect(span).not.toBeNull();
+    if (span) {
       expect(span).toHaveClass('special');
       expect(span).toHaveClass('rainbow-text');
       expect(span).toHaveClass('marquee-text');
-    });
+    }
   });
 
 });

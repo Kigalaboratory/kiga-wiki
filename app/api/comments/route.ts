@@ -1,15 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../lib/prisma';
 
-// 再帰的に子コメントを取得するための型定義
-type CommentWithChildren = {
-  id: number;
-  author: string;
-  content: string;
-  createdAt: Date;
-  parentId: number | null;
-  children: CommentWithChildren[];
-};
 
 const includeChildren = {
   children: {

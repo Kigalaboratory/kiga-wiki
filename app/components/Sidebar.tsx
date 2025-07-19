@@ -75,10 +75,7 @@ export default function Sidebar() {
               >
                 {item.icon}{' '}
                 {isSpecial ? (
-                  <>
-                    <span className="special rainbow-text marquee-text">{item.name}</span>
-                    <span className="special rainbow-text marquee-text">{item.name}</span>
-                  </>
+                  <span className="special rainbow-text marquee-text">{item.name}</span>
                 ) : (
                   item.name
                 )}

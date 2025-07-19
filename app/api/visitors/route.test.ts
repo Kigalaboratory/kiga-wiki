@@ -1,7 +1,6 @@
 import { GET, POST } from './route';
 import { prisma } from '../../lib/prisma';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NextRequest } from 'next/server';
 import type { Visitor } from '@prisma/client';
 
 vi.mock('../../lib/prisma', () => ({
@@ -53,8 +52,7 @@ describe('POST /api/visitors', () => {
     mockedPrisma.visitor.findFirst.mockResolvedValue(initialCount);
     mockedPrisma.visitor.update.mockResolvedValue(updatedCount);
 
-    // POST関数は引数を取らないため、リクエストオブジェクトは不要
-    const response = await POST();
+    const response = await POST(new Request('http://localhost'));
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -72,8 +70,7 @@ describe('POST /api/visitors', () => {
     const newCount: Visitor = { id: 1, count: 1 };
     mockedPrisma.visitor.create.mockResolvedValue(newCount);
 
-    // POST関数は引数を取らないため、リクエストオブジェクトは不要
-    const response = await POST();
+    const response = await POST(new Request('http://localhost'));
     const data = await response.json();
 
     expect(response.status).toBe(201);
