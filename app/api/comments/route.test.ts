@@ -31,58 +31,55 @@ beforeEach(() => {
 });
 
 describe('GET /api/comments', () => {
-  it('should return a nested list of comments from the database', async () => {
-    const mockDate = new Date();
-    // モックデータに型を適用
-    const mockComments: CommentWithChildren[] = [
-      { 
-        id: 1, 
-        author: '親コメント', 
-        content: 'これが親です', 
-        createdAt: mockDate, 
-        parentId: null, 
-        children: [
-          { 
-            id: 2, 
-            author: '子コメント', 
-            content: 'これが子です', 
-            createdAt: mockDate, 
-            parentId: 1, 
-            children: [] 
-          }
-        ] 
-      }
-    ];
-    mockedPrisma.comment.findMany.mockResolvedValue(mockComments);
+  // DateオブジェクトをISO文字列に変換する再帰関数
+  const stringifyDates = (comments: CommentWithChildren[]): StringifiedCommentWithChildren[] => {
+    return comments.map(c => ({
+      ...c,
+      createdAt: c.createdAt.toISOString(),
+      children: c.children ? stringifyDates(c.children) : [],
+    }));
+  };
 
-    const response = await GET();
+  it('should return comments for the homepage when dishId is not provided', async () => {
+    const mockDate = new Date();
+    const mockHomepageComments: CommentWithChildren[] = [
+      { id: 1, author: 'Homepage Commenter', content: 'This is a homepage comment.', createdAt: mockDate, parentId: null, children: [], dishId: null, replyAuthor: null },
+    ];
+    mockedPrisma.comment.findMany.mockResolvedValue(mockHomepageComments);
+
+    const req = new NextRequest('http://localhost/api/comments');
+    const response = await GET(req);
     const data = await response.json();
 
-    // DateオブジェクトをISO文字列に変換する再帰関数
-    const stringifyDates = (comments: CommentWithChildren[]): StringifiedCommentWithChildren[] => {
-      return comments.map(c => ({
-        ...c,
-        createdAt: c.createdAt.toISOString(),
-        children: c.children ? stringifyDates(c.children) : [],
-      }));
-    };
-    const expectedComments = stringifyDates(mockComments);
+    const expectedComments = stringifyDates(mockHomepageComments);
 
     expect(response.status).toBe(200);
     expect(data).toEqual(expectedComments);
     expect(mockedPrisma.comment.findMany).toHaveBeenCalledWith({
-      where: { parentId: null },
-      include: {
-        children: {
-          include: {
-            children: {
-              include: {
-                children: true,
-              },
-            },
-          },
-        },
-      },
+      where: { parentId: null, dishId: null },
+      include: expect.any(Object),
+      orderBy: { createdAt: 'desc' },
+    });
+  });
+
+  it('should return comments for a specific dish when dishId is provided', async () => {
+    const mockDate = new Date();
+    const mockDishComments: CommentWithChildren[] = [
+      { id: 2, author: 'Dish Commenter', content: 'This is a dish comment.', createdAt: mockDate, parentId: null, children: [], dishId: 1, replyAuthor: null },
+    ];
+    mockedPrisma.comment.findMany.mockResolvedValue(mockDishComments);
+
+    const req = new NextRequest('http://localhost/api/comments?dishId=1');
+    const response = await GET(req);
+    const data = await response.json();
+
+    const expectedComments = stringifyDates(mockDishComments);
+
+    expect(response.status).toBe(200);
+    expect(data).toEqual(expectedComments);
+    expect(mockedPrisma.comment.findMany).toHaveBeenCalledWith({
+      where: { parentId: null, dishId: 1 },
+      include: expect.any(Object),
       orderBy: { createdAt: 'desc' },
     });
   });

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../lib/prisma';
 
 
@@ -14,11 +14,17 @@ const includeChildren = {
   },
 };
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const dishId = searchParams.get('dishId');
+
+  const whereClause = {
+    parentId: null,
+    dishId: dishId ? parseInt(dishId, 10) : null,
+  };
+
   const comments = await prisma.comment.findMany({
-    where: {
-      parentId: null, // 親コメントのみを取得
-    },
+    where: whereClause,
     include: includeChildren,
     orderBy: {
       createdAt: 'desc',
