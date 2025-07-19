@@ -16,25 +16,30 @@ export default function Page() {
     setComments(data);
   };
 
-  useEffect(() => {
-    fetchComments();
-  }, []);
-
-  const handleCommentSubmit = async (comment: { author?: string; content: string; parentId?: number }) => {
+  const handleCommentSubmit = async (comment: { author?: string; content: string; parentId?: number; replyAuthor?: string }) => {
     const postData = {
-      author: comment.author || '名無しさん', // authorがなければデフォルト値
+      author: comment.author,
       content: comment.content,
       parentId: comment.parentId,
+      replyAuthor: comment.replyAuthor,
     };
 
-    await fetch('/api/comments', {
+    const response = await fetch('/api/comments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(postData),
     });
-    await fetchComments();
+
+    if (response.ok) {
+      // 成功した場合、状態を楽観的に更新するか、再度フェッチする
+      // ここではシンプルに再フェッチ
+      await fetchComments();
+    } else {
+      // エラーハンドリング
+      console.error('Failed to submit comment');
+    }
   };
 
   const handleScrollToComment = () => {

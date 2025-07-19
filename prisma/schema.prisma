@@ -32,12 +32,12 @@ model Visitor {
 }
 
 model Comment {
-  id        Int      @id @default(autoincrement())
-  author    String
-  content   String
-  createdAt DateTime @default(now())
-
-  parentId  Int?
-  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
-  children  Comment[] @relation("CommentReplies")
+  id           Int      @id @default(autoincrement())
+  author       String
+  replyAuthor  String?
+  content      String
+  createdAt    DateTime @default(now())
+  parentId     Int?
+  parent       Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  children     Comment[] @relation("CommentReplies")
 }

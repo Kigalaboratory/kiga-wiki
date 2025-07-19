@@ -1,5 +1,0 @@
--- CreateTable
-CREATE TABLE "Visitor" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "count" INTEGER NOT NULL
-);

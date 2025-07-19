@@ -3,11 +3,13 @@
 import { useState } from 'react';
 
 type CommentFormProps = {
-  onSubmit: (data: { author: string; content: string; parentId?: number }) => Promise<void>;
+  onSubmit: (data: { author?: string; content: string; parentId?: number, replyAuthor?: string }) => Promise<void>;
+  parentId?: number;
 };
 
-export default function CommentForm({ onSubmit }: CommentFormProps) {
+export default function CommentForm({ onSubmit, parentId }: CommentFormProps) {
   const [author, setAuthor] = useState('');
+  const [replyAuthor, setReplyAuthor] = useState('');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -17,8 +19,13 @@ export default function CommentForm({ onSubmit }: CommentFormProps) {
     setIsSubmitting(true);
     
     try {
-      await onSubmit({ author, content });
-      setAuthor('');
+      if (parentId) {
+        await onSubmit({ content, parentId, replyAuthor });
+        setReplyAuthor('');
+      } else {
+        await onSubmit({ author, content });
+        setAuthor('');
+      }
       setContent('');
       setIsSubmitted(true);
       // フォームが消えるアニメーションの後、再度表示するために状態をリセット
@@ -35,17 +42,31 @@ export default function CommentForm({ onSubmit }: CommentFormProps) {
       className={`review-form ${isSubmitted ? 'fly-away' : ''}`}
       role="form"
     >
-      <div className="form-group">
-        <label htmlFor="authorName">お主の名を名乗るがよい</label>
-        <input
-          id="authorName"
-          type="text"
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-          placeholder="例：通りすがりの賢者"
-          required
-        />
-      </div>
+      {parentId ? (
+        <div className="form-group">
+          <label htmlFor="replyAuthorName">返信者名を名乗るがよい</label>
+          <input
+            id="replyAuthorName"
+            type="text"
+            value={replyAuthor}
+            onChange={(e) => setReplyAuthor(e.target.value)}
+            placeholder="例：通りすがりの賢者"
+            required
+          />
+        </div>
+      ) : (
+        <div className="form-group">
+          <label htmlFor="authorName">お主の名を名乗るがよい</label>
+          <input
+            id="authorName"
+            type="text"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            placeholder="例：通りすがりの賢者"
+            required
+          />
+        </div>
+      )}
       <div className="form-group">
         <label htmlFor="commentContent">この掲示板への熱き想いを語るのじゃ！</label>
         <textarea

@@ -2,28 +2,25 @@
 
 import { useState } from 'react';
 import { CommentWithChildren } from '../types';
+import CommentForm from './CommentForm';
 
 type CommentListProps = {
   comments: CommentWithChildren[];
-  onReply: (data: { content: string; parentId: number }) => void;
+  onReply: (data: { author?: string; content: string; parentId?: number, replyAuthor?: string }) => Promise<void>;
 };
 
 // 単一のコメントを表示するコンポーネント
-const CommentItem = ({ comment, onReply }: { comment: CommentWithChildren, onReply: (data: { content: string; parentId: number }) => void; }) => {
+const CommentItem = ({ comment, onReply }: { comment: CommentWithChildren, onReply: (data: { author?: string; content: string; parentId?: number, replyAuthor?: string }) => Promise<void>; }) => {
   const [showReplyForm, setShowReplyForm] = useState(false);
-  const [replyContent, setReplyContent] = useState('');
 
-  const handleReplySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onReply({ content: replyContent, parentId: comment.id });
-    setReplyContent('');
+  const handleReplySubmitted = async () => {
     setShowReplyForm(false);
   };
 
   return (
     <li className="comment-item">
       <p className="comment-content">{comment.content}</p>
-      <p className="comment-author">- {comment.author}</p>
+      <p className="comment-author">- {comment.replyAuthor || comment.author}</p>
       <time className="comment-date">
         {new Date(comment.createdAt).toLocaleString('ja-JP')}
       </time>
@@ -32,16 +29,15 @@ const CommentItem = ({ comment, onReply }: { comment: CommentWithChildren, onRep
       </button>
 
       {showReplyForm && (
-        <form onSubmit={handleReplySubmit} className="reply-form">
-          <label htmlFor={`reply-textarea-${comment.id}`}>このコメントへの返信をどうぞ</label>
-          <textarea
-            id={`reply-textarea-${comment.id}`}
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            required
+        <div className="reply-form-container">
+          <CommentForm
+            parentId={comment.id}
+            onSubmit={async (data) => {
+              await onReply(data);
+              handleReplySubmitted();
+            }}
           />
-          <button type="submit">返信を投稿する</button>
-        </form>
+        </div>
       )}
 
       {comment.children && comment.children.length > 0 && (

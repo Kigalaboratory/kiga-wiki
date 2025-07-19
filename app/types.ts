@@ -12,6 +12,7 @@ export type Dish = {
 export type Comment = {
   id: number;
   author: string;
+  replyAuthor?: string | null;
   content: string;
   createdAt: Date;
   parentId: number | null;
