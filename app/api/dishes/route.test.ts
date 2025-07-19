@@ -1,7 +1,8 @@
 import { GET, POST } from './route';
 import { prisma } from '../../lib/prisma';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { NextRequest } from 'next/server';
+import { Dish, Review } from '@prisma/client';
 
 vi.mock('../../lib/prisma', () => ({
   prisma: {
@@ -12,6 +13,13 @@ vi.mock('../../lib/prisma', () => ({
   },
 }));
 
+const mockPrisma = prisma as unknown as {
+  dish: {
+    findMany: Mock;
+    create: Mock;
+  };
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -19,12 +27,11 @@ beforeEach(() => {
 describe('GET /api/dishes', () => {
   it('should return a list of dishes from the database', async () => {
     const mockDate = new Date();
-    const mockDishes = [
-      { id: 1, name: 'モック料理1', chef: 'シェフ1', comment: 'コメント1', createdAt: mockDate },
-      { id: 2, name: 'モック料理2', chef: 'シェフ2', comment: 'コメント2', createdAt: mockDate },
+    const mockDishes: (Dish & { reviews: Review[] })[] = [
+      { id: 1, name: 'モック料理1', createdAt: mockDate, reviews: [] },
+      { id: 2, name: 'モック料理2', createdAt: mockDate, reviews: [] },
     ];
-    const mockFindMany = vi.mocked(prisma.dish.findMany);
-    mockFindMany.mockResolvedValue(mockDishes);
+    mockPrisma.dish.findMany.mockResolvedValue(mockDishes);
 
     const response = await GET();
     const data = await response.json();
@@ -41,10 +48,17 @@ describe('GET /api/dishes', () => {
 describe('POST /api/dishes', () => {
   it('should create a new dish and return it', async () => {
     const newDish = { name: '新作ラボ飯', chef: '新人研究員', comment: '美味しかったです！' };
-    const createdDish = { ...newDish, id: 3, createdAt: new Date() };
+    // `createDish`は`reviews`を含んだDishを返すため、モックの戻り値もそれに合わせる
+    const createdDish: Dish & { reviews: Review[] } = { 
+      id: 3, 
+      name: newDish.name, 
+      createdAt: new Date(),
+      reviews: [
+        { id: 1, dishId: 3, chef: newDish.chef, comment: newDish.comment, createdAt: new Date() }
+      ] 
+    };
     
-    const mockCreate = vi.mocked(prisma.dish.create);
-    mockCreate.mockResolvedValue(createdDish);
+    mockPrisma.dish.create.mockResolvedValue(createdDish);
 
     const req = new NextRequest('http://localhost/api/dishes', {
       method: 'POST',
@@ -54,9 +68,35 @@ describe('POST /api/dishes', () => {
     const response = await POST(req);
     const data = await response.json();
 
+    const { name, chef, comment } = newDish;
+    const expectedPrismaArgs = {
+      data: {
+        name,
+        reviews: {
+          create: {
+            chef,
+            comment,
+          },
+        },
+      },
+      include: {
+        reviews: true,
+      },
+    };
+
     expect(response.status).toBe(201);
-    expect(data).toEqual({ ...createdDish, createdAt: createdDish.createdAt.toISOString() });
-    expect(prisma.dish.create).toHaveBeenCalledWith({ data: newDish });
-    expect(prisma.dish.create).toHaveBeenCalledTimes(1);
+    // JSONシリアライズを考慮して期待値を生成
+    const expectedResponse = { 
+      ...createdDish, 
+      createdAt: createdDish.createdAt.toISOString(),
+      reviews: createdDish.reviews.map(r => ({
+        ...r,
+        createdAt: r.createdAt.toISOString(),
+      })),
+    };
+    // レスポンスの`data`が期待値と一致するか確認
+    expect(data).toEqual(expectedResponse);
+    expect(mockPrisma.dish.create).toHaveBeenCalledWith(expectedPrismaArgs);
+    expect(mockPrisma.dish.create).toHaveBeenCalledTimes(1);
   });
 });

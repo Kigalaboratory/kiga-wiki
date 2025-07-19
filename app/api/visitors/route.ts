@@ -6,7 +6,7 @@ export async function GET() {
   return NextResponse.json({ count: visitor?.count ?? 0 });
 }
 
-export async function POST() {
+export async function POST(req: Request) {
   const visitor = await prisma.visitor.findFirst();
 
   if (visitor) {

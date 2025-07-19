@@ -44,10 +44,10 @@ describe('LabMeshiPage Integration Test', () => {
 
     // 4. フォーム入力と送信
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText('料理名'), newDish.name);
-    await user.type(screen.getByLabelText('ハンドルネーム'), newDish.chef);
-    await user.type(screen.getByLabelText('コメント'), newDish.comment || '');
-    await user.click(screen.getByRole('button', { name: '評価を投稿' }));
+    await user.type(screen.getByLabelText('拙者が作りし料理の名を言ってみよ'), newDish.name);
+    await user.type(screen.getByLabelText('お主の名を名乗るがよい'), newDish.chef);
+    await user.type(screen.getByLabelText('この料理への熱き想いを語るのじゃ！'), newDish.comment || '');
+    await user.click(screen.getByRole('button', { name: 'この評価、天に届け！' }));
 
     // 5. 新しい料理がリストに表示されるのを待つ
     await waitFor(() => {

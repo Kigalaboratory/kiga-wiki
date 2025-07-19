@@ -64,16 +64,27 @@ export default function Sidebar() {
       <div className="sidebar-box">
         <div className="sidebar-header">ページ</div>
         <nav>
-          {sidebarItems.map(item => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`sidebar-item ${activeItem === item.name ? 'active' : ''} ${item.className || ''}`}
-              onClick={() => handleItemClick(item.name)}
-            >
-              {item.icon} {item.name}
-            </Link>
-          ))}
+          {sidebarItems.map(item => {
+            const isSpecial = item.name === '胃袋への挑戦状';
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`sidebar-item ${activeItem === item.name ? 'active' : ''} ${item.className || ''}`}
+                onClick={() => handleItemClick(item.name)}
+              >
+                {item.icon}{' '}
+                {isSpecial ? (
+                  <>
+                    <span className="special rainbow-text marquee-text">{item.name}</span>
+                    <span className="special rainbow-text marquee-text">{item.name}</span>
+                  </>
+                ) : (
+                  item.name
+                )}
+              </Link>
+            );
+          })}
         </nav>
         <button className="add-page-btn">
           <span className="icon-plus"></span>
