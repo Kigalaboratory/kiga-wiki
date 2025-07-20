@@ -5,6 +5,7 @@ import "katex/dist/katex.min.css";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import CookieBanner from "./components/CookieBanner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +26,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="/assets/css/main.css" />
       </head>
       <body className={inter.className}>
+        <CookieBanner />
         <Header />
         <div className="main-content">
           <Sidebar />

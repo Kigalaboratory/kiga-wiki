@@ -1,4 +1,11 @@
+'use client';
+
 export default function Header() {
+  const handleResetCookie = () => {
+    localStorage.removeItem('cookieConsent');
+    window.location.reload(); // ページをリロードしてバナーを再表示
+  };
+
   return (
     <header>
       <div className="container">
@@ -16,6 +23,10 @@ export default function Header() {
               <span className="icon-history"></span>
               履歴
             </a>
+            <button onClick={handleResetCookie} className="btn btn-red">
+              <span className="icon-cookie"></span>
+              クッキー設定をリセット
+            </button>
           </div>
         </div>
       </div>
