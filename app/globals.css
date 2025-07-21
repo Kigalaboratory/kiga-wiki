@@ -353,3 +353,9 @@ a {
 .animate-slide-in-top {
   animation: slide-in-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
 }
+
+@media (prefers-color-scheme: dark) {
+  .reply-button {
+    color: #000;
+  }
+}
