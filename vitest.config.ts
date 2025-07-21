@@ -8,6 +8,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './vitest.setup.ts',
+    globalSetup: './scripts/reset-test-db.ts',
   },
   resolve: {
     alias: {
