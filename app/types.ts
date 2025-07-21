@@ -5,6 +5,7 @@ export type Comment = {
   content: string;
   createdAt: Date;
   parentId: number | null;
+  dishId?: number | null;
 };
 
 export type CommentWithChildren = Comment & {
