@@ -58,7 +58,7 @@ export default function LabMeshiPage() {
   return (
     <article>
       <h1>
-        当研究室における非公式調理活動（通称：ラボ飯）の定量的評価と格付けに関する包括的報告書
+        非公式調理活動（通称：ラボ飯）の定量的評価と格付けに関する包括的報告書
       </h1>
       <p>
         <strong>
@@ -73,7 +73,7 @@ export default function LabMeshiPage() {
       <section>
         <h2>1. 要旨 (Abstract)</h2>
         <p>
-          本稿は、木賀研究室という知的生産性の極限状態に置かれた環境下で、構成員のQOL（Quality
+          本稿は、当秘密結社の研究所という知的生産性の極限状態に置かれた環境下で、構成員のQOL（Quality
           of
           Life）維持のために自然発生的に行われる調理活動、通称「ラボ飯」の体系的な評価を試みるものである。我々は、味覚的満足度、コスト効率、調理時間、そして最も重要な
           <strong>実験室環境適合性</strong>

@@ -13,7 +13,7 @@ describe('HomePage', () => {
     render(<HomePage initialComments={[]} />);
 
     const heading = screen.getByRole('heading', {
-      name: /スーパーすごいプロジェクト Kiga Wiki へようこそ！/i,
+      name: /スーパーすごいプロジェクト Wiki へようこそ！/i,
     });
 
     expect(heading).toBeInTheDocument();
