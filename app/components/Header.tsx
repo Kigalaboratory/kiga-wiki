@@ -40,7 +40,7 @@ export default function Header() {
         <div className="header-content">
           <div className="logo">
             <span className="bounce-icon icon-book"></span>
-            <h1>Kiga Wiki</h1>
+            <h1>Key Intelligence Gateway for Advancement Wiki</h1>
           </div>
           <div className="header-buttons">
             <button onClick={handleEditClick} className="btn btn-green">

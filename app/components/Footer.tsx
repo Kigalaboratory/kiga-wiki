@@ -72,6 +72,11 @@ export default function Footer() {
             <a href="#" className="social-link cookie icon-cookie" title="Cookie"></a>
           </div>
         </div>
+        <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.8rem', color: '#888' }}>
+          <p>
+            本ウェブサイトに掲載されている事象、登場する人物、団体、名称、事件、場所などはすべて架空のものであり、<strong>実在のものとは一切関係ありません</strong>。
+          </p>
+        </div>
         <div style={{ textAlign: 'center' }}>
           <button onClick={activateSecret} id="secretButton" className="secret-button">
             ここをクリックしても何も起きません（多分）

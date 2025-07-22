@@ -71,10 +71,10 @@ project.doMagic()
   return (
     <main className="content">
       <article>
-        <h1 className="rainbow-title">スーパーすごいプロジェクト Kiga Wiki へようこそ！</h1>
+        <h1 className="rainbow-title">スーパーすごいプロジェクト Wiki へようこそ！</h1>
 
         <p>
-          このWikiページは、木賀研究室の裏ホームページとして、暗躍しています。左側のナビゲーションから必要な情報を見つけることができます。（迷子にならないでね👀）。
+          このWikiページは、とある秘密結社のホームページとして、暗躍しています。左側のナビゲーションから必要な情報を見つけることができます。（迷子にならないでね👀）。
         </p>
 
         <VisitorCounter onScrollToComment={handleScrollToComment} />
